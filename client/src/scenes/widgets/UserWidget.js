@@ -18,13 +18,14 @@ const UserWidget = ({ userId, picturePath }) => {
     const { palette } = useTheme();
     const navigate = useNavigate();
     const token = useSelector((state) => state.token);
+    const server = useSelector((state) => state.server);
     // const friends = useSelector((state) => state.user.friends);
     const dark = palette.neutral.dark;
     const medium = palette.neutral.medium;
     const main = palette.neutral.main;
 
     const getUser = async () => {
-        const response = await fetch(`http://localhost:4000/users/${userId}`, {
+        const response = await fetch(`${server}/users/${userId}`, {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
         });

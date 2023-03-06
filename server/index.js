@@ -36,12 +36,12 @@ app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 // from multer github
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/assets");
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
-  },
+    destination: function (req, file, cb) {
+        cb(null, "public/assets");
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.originalname);
+    },
 });
 
 const upload = multer({ storage });
@@ -65,9 +65,9 @@ connectDB();
 
 const PORT = process.env.PORT || 4142;
 app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
+    console.log(`Server started on port ${PORT}`);
 });
 
 app.get("/", (req, res) => {
-  res.send("Hello");
+    res.send("Api is Working");
 });

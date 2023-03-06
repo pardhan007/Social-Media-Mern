@@ -7,9 +7,10 @@ const AllPost = ({ userId, isProfile = false }) => {
     const dispatch = useDispatch();
     const posts = useSelector((state) => state.posts);
     const token = useSelector((state) => state.token);
+    const server = useSelector((state) => state.server);
 
     const getPosts = async () => {
-        const response = await fetch(`http://localhost:4000/posts`, {
+        const response = await fetch(`${server}/posts`, {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -19,13 +20,10 @@ const AllPost = ({ userId, isProfile = false }) => {
     };
 
     const getUserPosts = async () => {
-        const response = await fetch(
-            `http://localhost:4000/posts/${userId}/posts`,
-            {
-                method: "GET",
-                headers: { Authorization: `Bearer ${token}` },
-            }
-        );
+        const response = await fetch(`${server}/posts/${userId}/posts`, {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+        });
 
         const data = await response.json();
         dispatch(setPosts({ posts: data }));

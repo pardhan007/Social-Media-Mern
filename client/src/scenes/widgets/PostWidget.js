@@ -18,6 +18,7 @@ const PostWidget = ({ post }) => {
     const dispatch = useDispatch();
     const token = useSelector((state) => state.token);
     const loggedInUserId = useSelector((state) => state.user._id);
+    const server = useSelector((state) => state.server);
     const isLiked = Boolean(post.likes[loggedInUserId]);
     const likeCount = Object.keys(post.likes).length;
 
@@ -27,7 +28,7 @@ const PostWidget = ({ post }) => {
 
     const patchLike = async () => {
         const response = await fetch(
-            `http://localhost:4000/posts/${post._id}/like`,
+            `${server}/posts/${post._id}/like`,
             {
                 method: "PATCH",
                 headers: {
@@ -63,7 +64,7 @@ const PostWidget = ({ post }) => {
                         objectFit: "contain",
                         maxHeight: "650px",
                     }}
-                    src={`http://localhost:4000/assets/${post.picturePath}`}
+                    src={`${server}/assets/${post.picturePath}`}
                 />
             )}
             <FlexBetween mt="0.25rem">

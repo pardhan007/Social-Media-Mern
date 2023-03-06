@@ -12,6 +12,7 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
     const userId = useSelector((state) => state.user._id);
     const token = useSelector((state) => state.token);
     const friends = useSelector((state) => state.user.friends);
+    const server = useSelector((state) => state.server);
     // console.log(friends);
 
     const { palette } = useTheme();
@@ -29,16 +30,13 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
     // console.log(isFriend);
 
     const patchFriend = async () => {
-        const response = await fetch(
-            `http://localhost:4000/users/${userId}/${friendId}`,
-            {
-                method: "PATCH",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-            }
-        );
+        const response = await fetch(`${server}/users/${userId}/${friendId}`, {
+            method: "PATCH",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        });
         const data = await response.json();
         dispatch(setFriends({ friends: data }));
     };
