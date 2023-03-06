@@ -1,3 +1,5 @@
+import { useSelector } from "react-redux";
+
 const { Box } = require("@mui/material");
 
 const UserImage = ({ image, size = "50px" }) => {
