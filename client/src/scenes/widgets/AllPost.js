@@ -39,9 +39,10 @@ const AllPost = ({ userId, isProfile = false }) => {
 
     return (
         <>
-            {posts.map((post) => {
-                return <PostWidget key={post._id} post={post} />;
-            })}
+            {posts &&
+                posts.map((post) => {
+                    return <PostWidget key={post._id} post={post} />;
+                })}
         </>
     );
 };

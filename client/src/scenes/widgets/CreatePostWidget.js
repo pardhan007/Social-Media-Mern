@@ -17,7 +17,6 @@ import {
     useMediaQuery,
     useTheme,
 } from "@mui/material";
-import { borderRadius, color } from "@mui/system";
 import FlexBetween from "components/FlexBetween";
 import UserImage from "components/UserImage";
 import WidgetWrapper from "components/WidgetWrapper";
@@ -29,7 +28,8 @@ import { setPosts } from "state/State";
 const CreatePostWidget = ({ picturePath }) => {
     const dispatch = useDispatch();
     const [isImage, setIsImage] = useState(false);
-    const [image, setImage] = useState(null);
+    const [image, setImage] = useState("");
+    const [imageName, setImageName] = useState("");
     const [postDescription, setPostsDescription] = useState("");
     const { palette } = useTheme();
     const { _id } = useSelector((state) => state.user);
@@ -40,22 +40,59 @@ const CreatePostWidget = ({ picturePath }) => {
     const medium = palette.neutral.medium;
 
     const handlePost = async () => {
-        const formData = new FormData();
-        formData.append("userId", _id);
-        formData.append("description", postDescription);
+        let data = {
+            userId: _id,
+            description: postDescription,
+        };
         if (image) {
-            formData.append("picture", image);
-            formData.append("picturePath", image.name);
+            data = { ...data, picturePath: image };
         }
         const response = await fetch(`${server}/posts`, {
             method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-            body: formData,
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
         });
         const posts = await response.json(); // all posts
         dispatch(setPosts({ posts }));
-        setImage(null);
+        setImage("");
+        setImageName("");
         setPostsDescription("");
+    };
+
+    const picUpload = (pics) => {
+        // console.log(pics);
+        setImageName(pics.name);
+        if (pics === undefined) {
+            return;
+        }
+
+        if (
+            pics.type === "image/jpeg" ||
+            pics.type === "image/png" ||
+            pics.type === "image/jpg"
+        ) {
+            const data = new FormData();
+            data.append("file", pics);
+            data.append("upload_preset", "socialmern");
+            fetch("https://api.cloudinary.com/v1_1/socialmern/image/upload", {
+                method: "post",
+                body: data,
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    setImage(data.url.toString());
+                    // console.log(data);
+                    // console.log(data.url.toString());
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        } else {
+            return;
+        }
     };
 
     return (
@@ -84,7 +121,9 @@ const CreatePostWidget = ({ picturePath }) => {
                     <Dropzone
                         acceptedFiles=".jpg, .jpeg, .png"
                         multiple={false}
-                        onDrop={(acceptedFiles) => setImage(acceptedFiles[0])}
+                        onDrop={(acceptedFiles) => {
+                            picUpload(acceptedFiles[0]);
+                        }}
                     >
                         {({ getRootProps, getInputProps }) => (
                             <FlexBetween gap="1rem">
@@ -97,14 +136,12 @@ const CreatePostWidget = ({ picturePath }) => {
                                         "&:hover": { cursor: "pointer" },
                                     }}
                                 >
-                                    <input {...getInputProps()} />
+                                    <input type="file" {...getInputProps()} />
                                     {!image ? (
                                         <p>Add Image Here</p>
                                     ) : (
                                         <FlexBetween>
-                                            <Typography>
-                                                {image.name}
-                                            </Typography>
+                                            <Typography>{imageName}</Typography>
                                             <EditOutlined />
                                         </FlexBetween>
                                     )}

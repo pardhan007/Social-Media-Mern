@@ -23,7 +23,7 @@ const registerSchema = yup.object().shape({
     password: yup.string().required("required"),
     location: yup.string().required("required"),
     occupation: yup.string().required("required"),
-    picture: yup.string().required("required"),
+    picture: yup.string(),
 });
 
 const loginSchema = yup.object().shape({
@@ -56,20 +56,43 @@ const Form = () => {
     const isRegister = pageType === "register";
     const server = useSelector((state) => state.server);
 
-    const register = async (values, onSubmitProps) => {
-        // this allows us to send form info with image
-        const formData = new FormData();
-
-        // when we have image then this is the way to send image to the request body
-
-        for (let value in values) {
-            formData.append(value, values[value]);
+    const picUpload = async (pics) => {
+        // console.log(pics);
+        if (pics === undefined) {
+            return;
         }
-        formData.append("picturePath", values.picture.name);
+        if (
+            pics.type === "image/jpeg" ||
+            pics.type === "image/png" ||
+            pics.type === "image/jpg"
+        ) {
+            const data = new FormData();
+            data.append("file", pics);
+            data.append("upload_preset", "socialmern");
+            const response = await fetch(
+                "https://api.cloudinary.com/v1_1/socialmern/image/upload",
+                {
+                    method: "post",
+                    body: data,
+                }
+            );
+            const responseData = await response.json();
+            let ans = responseData.url.toString();
+            return ans;
+        } else {
+            return "";
+        }
+    };
+
+    const register = async (values, onSubmitProps) => {
+        let ans = await picUpload(values.picture);
+        delete values["picture"];
+        values = { ...values, picturePath: ans };
 
         const savedUserResponse = await fetch(`${server}/auth/register`, {
             method: "POST",
-            body: formData,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(values),
         });
 
         const savedUser = await savedUserResponse.json();
@@ -79,7 +102,6 @@ const Form = () => {
             setPageType("login");
         }
     };
-
     const login = async (values, onSubmitProps) => {
         const loggedInUserResponse = await fetch(`${server}/auth/login`, {
             method: "POST",

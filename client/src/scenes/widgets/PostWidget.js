@@ -27,17 +27,14 @@ const PostWidget = ({ post }) => {
     const primary = palette.primary.main;
 
     const patchLike = async () => {
-        const response = await fetch(
-            `${server}/posts/${post._id}/like`,
-            {
-                method: "PATCH",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ userId: loggedInUserId }),
-            }
-        );
+        const response = await fetch(`${server}/posts/${post._id}/like`, {
+            method: "PATCH",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ userId: loggedInUserId }),
+        });
         const updatedPost = await response.json();
         dispatch(setPost({ post: updatedPost }));
     };
@@ -64,13 +61,13 @@ const PostWidget = ({ post }) => {
                         objectFit: "contain",
                         maxHeight: "650px",
                     }}
-                    src={`${server}/assets/${post.picturePath}`}
+                    src={post.picturePath}
                 />
             )}
             <FlexBetween mt="0.25rem">
                 <FlexBetween gap="1rem">
                     {/* LIKE */}
-                    <FlexBetween gap="0.3rem">
+                    <FlexBetween>
                         <IconButton onClick={patchLike}>
                             {isLiked ? (
                                 <FavoriteOutlined sx={{ color: primary }} />

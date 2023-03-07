@@ -7,6 +7,7 @@ const initialState = {
     token: null,
     posts: [],
     server: "https://socialpedia-zx17.onrender.com",
+    // server: "http://localhost:4000",
 };
 
 export const authSlice = createSlice({
