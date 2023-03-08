@@ -10,6 +10,7 @@ import {
 import {
     Box,
     Button,
+    CircularProgress,
     Divider,
     IconButton,
     InputBase,
@@ -26,6 +27,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { setPosts } from "state/State";
 
 const CreatePostWidget = ({ picturePath }) => {
+    const [loading, setLoading] = useState(false);
+    const [imageUploadLoading, setImageUploadLoading] = useState(false);
     const dispatch = useDispatch();
     const [isImage, setIsImage] = useState(false);
     const [image, setImage] = useState("");
@@ -40,6 +43,7 @@ const CreatePostWidget = ({ picturePath }) => {
     const medium = palette.neutral.medium;
 
     const handlePost = async () => {
+        setLoading(true);
         let data = {
             userId: _id,
             description: postDescription,
@@ -57,18 +61,20 @@ const CreatePostWidget = ({ picturePath }) => {
         });
         const posts = await response.json(); // all posts
         dispatch(setPosts({ posts }));
+        setLoading(false);
         setImage("");
+        setIsImage(false);
         setImageName("");
         setPostsDescription("");
     };
 
-    const picUpload = (pics) => {
+    const picUpload = async (pics) => {
         // console.log(pics);
+        setImageUploadLoading(true);
         setImageName(pics.name);
         if (pics === undefined) {
             return;
         }
-
         if (
             pics.type === "image/jpeg" ||
             pics.type === "image/png" ||
@@ -77,20 +83,19 @@ const CreatePostWidget = ({ picturePath }) => {
             const data = new FormData();
             data.append("file", pics);
             data.append("upload_preset", "socialmern");
-            fetch("https://api.cloudinary.com/v1_1/socialmern/image/upload", {
-                method: "post",
-                body: data,
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    setImage(data.url.toString());
-                    // console.log(data);
-                    // console.log(data.url.toString());
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
+            const response = await fetch(
+                "https://api.cloudinary.com/v1_1/socialmern/image/upload",
+                {
+                    method: "post",
+                    body: data,
+                }
+            );
+            const responseData = await response.json();
+            console.log(responseData.url);
+            setImage(responseData.url.toString());
+            setImageUploadLoading(false);
         } else {
+            setImageUploadLoading(false);
             return;
         }
     };
@@ -116,7 +121,7 @@ const CreatePostWidget = ({ picturePath }) => {
                     border={`1px solid ${medium}`}
                     borderRadius="5px"
                     mt="1rem"
-                    p="1rem"
+                    p="0.6rem"
                 >
                     <Dropzone
                         acceptedFiles=".jpg, .jpeg, .png"
@@ -138,7 +143,14 @@ const CreatePostWidget = ({ picturePath }) => {
                                 >
                                     <input type="file" {...getInputProps()} />
                                     {!image ? (
-                                        <p>Add Image Here</p>
+                                        imageUploadLoading ? (
+                                            <CircularProgress
+                                                color="primary"
+                                                size={20}
+                                            />
+                                        ) : (
+                                            <p>Add Image Here</p>
+                                        )
                                     ) : (
                                         <FlexBetween>
                                             <Typography>{imageName}</Typography>
@@ -238,7 +250,11 @@ const CreatePostWidget = ({ picturePath }) => {
                         "&:hover": { color: palette.primary.main },
                     }}
                 >
-                    POST
+                    {loading ? (
+                        <CircularProgress color="error" size={20} />
+                    ) : (
+                        "POST"
+                    )}
                 </Button>
             </FlexBetween>
         </WidgetWrapper>

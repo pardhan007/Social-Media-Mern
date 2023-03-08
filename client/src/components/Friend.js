@@ -1,5 +1,12 @@
 import { PersonAddOutlined, PersonRemoveOutlined } from "@mui/icons-material";
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import {
+    Box,
+    CircularProgress,
+    IconButton,
+    Typography,
+    useTheme,
+} from "@mui/material";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setFriends } from "state/State";
@@ -13,8 +20,9 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
     const token = useSelector((state) => state.token);
     const friends = useSelector((state) => state.user.friends);
     const server = useSelector((state) => state.server);
-    // console.log(friends);
 
+    // console.log(friends);
+    const [loading, setLoading] = useState(false);
     const { palette } = useTheme();
     const primaryLight = palette.primary.light;
     const primaryDark = palette.primary.dark;
@@ -30,6 +38,7 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
     // console.log(isFriend);
 
     const patchFriend = async () => {
+        setLoading(true);
         const response = await fetch(`${server}/users/${userId}/${friendId}`, {
             method: "PATCH",
             headers: {
@@ -39,6 +48,7 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
         });
         const data = await response.json();
         dispatch(setFriends({ friends: data }));
+        setLoading(false);
     };
 
     return (
@@ -90,7 +100,13 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
                     }}
                 >
                     {isFriend ? (
-                        <PersonRemoveOutlined sx={{ color: primaryDark }} />
+                        loading ? (
+                            <CircularProgress color="primary" size={20} />
+                        ) : (
+                            <PersonRemoveOutlined sx={{ color: primaryDark }} />
+                        )
+                    ) : loading ? (
+                        <CircularProgress color="primary" size={20} />
                     ) : (
                         <PersonAddOutlined sx={{ color: primaryDark }} />
                     )}

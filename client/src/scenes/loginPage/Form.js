@@ -1,7 +1,7 @@
 import { EditOutlined } from "@mui/icons-material";
 import {
     Box,
-    Button,
+    CircularProgress,
     TextField,
     Typography,
     useMediaQuery,
@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import { setLogin } from "state/State.js";
+import { LoadingButton } from "@mui/lab";
 
 const registerSchema = yup.object().shape({
     firstName: yup.string().required("required"),
@@ -55,6 +56,7 @@ const Form = () => {
     const isLogin = pageType === "login";
     const isRegister = pageType === "register";
     const server = useSelector((state) => state.server);
+    const [loading, setLoading] = useState(false);
 
     const picUpload = async (pics) => {
         // console.log(pics);
@@ -85,6 +87,7 @@ const Form = () => {
     };
 
     const register = async (values, onSubmitProps) => {
+        setLoading(true);
         let ans = await picUpload(values.picture);
         delete values["picture"];
         values = { ...values, picturePath: ans };
@@ -101,8 +104,10 @@ const Form = () => {
         if (savedUser) {
             setPageType("login");
         }
+        setLoading(false);
     };
     const login = async (values, onSubmitProps) => {
+        setLoading(true);
         const loggedInUserResponse = await fetch(`${server}/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -121,6 +126,7 @@ const Form = () => {
                 })
             );
         }
+        setLoading(false);
         navigate("/home");
     };
 
@@ -316,7 +322,11 @@ const Form = () => {
                     {/* BUTTONS */}
 
                     <Box>
-                        <Button
+                        <LoadingButton
+                            loading={loading}
+                            loadingIndicator={
+                                <CircularProgress color="error" size={27} />
+                            }
                             fullWidth
                             type="submit"
                             sx={{
@@ -328,7 +338,7 @@ const Form = () => {
                             }}
                         >
                             {isLogin ? "LOGIN" : "REGISTER"}
-                        </Button>
+                        </LoadingButton>
                         <Typography
                             onClick={() => {
                                 setPageType(isLogin ? "register" : "login");
