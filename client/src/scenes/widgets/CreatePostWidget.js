@@ -91,7 +91,7 @@ const CreatePostWidget = ({ picturePath }) => {
                 }
             );
             const responseData = await response.json();
-            console.log(responseData.url);
+            // console.log(responseData.url);
             setImage(responseData.url.toString());
             setImageUploadLoading(false);
         } else {

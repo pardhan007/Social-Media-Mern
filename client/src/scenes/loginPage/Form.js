@@ -1,6 +1,7 @@
 import { EditOutlined } from "@mui/icons-material";
 import {
     Box,
+    Button,
     CircularProgress,
     TextField,
     Typography,
@@ -330,7 +331,8 @@ const Form = () => {
                             fullWidth
                             type="submit"
                             sx={{
-                                m: "2rem 0",
+                                mt: "2rem",
+                                mb: "1rem",
                                 p: "1rem",
                                 backgroundColor: palette.primary.main,
                                 color: palette.background.alt,
@@ -339,6 +341,25 @@ const Form = () => {
                         >
                             {isLogin ? "LOGIN" : "REGISTER"}
                         </LoadingButton>
+                        {isLogin && (
+                            <Button
+                                onClick={() => {
+                                    setFieldValue("email", "guest@example.com");
+                                    setFieldValue("password", "123456");
+                                }}
+                                fullWidth
+                                type="submit"
+                                sx={{
+                                    mb: "2rem",
+                                    p: "1rem",
+                                    backgroundColor: "red",
+                                    color: "white",
+                                    "&:hover": { color: palette.primary.main },
+                                }}
+                            >
+                                GUEST USER LOGIN
+                            </Button>
+                        )}
                         <Typography
                             onClick={() => {
                                 setPageType(isLogin ? "register" : "login");
