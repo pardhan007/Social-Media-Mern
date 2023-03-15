@@ -1,6 +1,7 @@
 import express from "express";
 import {
     createPost,
+    deletePost,
     getFeedPosts,
     getUserPosts,
     likePost,
@@ -21,5 +22,6 @@ router.patch("/:id/like", verifyToken, likePost);
 /* WRITE */
 
 router.post("/", verifyToken, createPost);
+router.post("/delete/:id", verifyToken, deletePost);
 
 export default router;

@@ -4,7 +4,15 @@ import {
     FavoriteOutlined,
     ShareOutlined,
 } from "@mui/icons-material";
-import { Box, Divider, IconButton, Typography, useTheme } from "@mui/material";
+import {
+    Box,
+    Checkbox,
+    CircularProgress,
+    Divider,
+    IconButton,
+    Typography,
+    useTheme,
+} from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";
@@ -21,12 +29,14 @@ const PostWidget = ({ post }) => {
     const server = useSelector((state) => state.server);
     const isLiked = Boolean(post.likes[loggedInUserId]);
     const likeCount = Object.keys(post.likes).length;
+    const [lodaing, setLoading] = useState(false);
 
     const { palette } = useTheme();
     const main = palette.neutral.main;
     const primary = palette.primary.main;
 
     const patchLike = async () => {
+        setLoading(true);
         const response = await fetch(`${server}/posts/${post._id}/like`, {
             method: "PATCH",
             headers: {
@@ -37,6 +47,7 @@ const PostWidget = ({ post }) => {
         });
         const updatedPost = await response.json();
         dispatch(setPost({ post: updatedPost }));
+        setLoading(false);
     };
 
     return (
@@ -46,6 +57,7 @@ const PostWidget = ({ post }) => {
                 name={`${post.firstName} ${post.lastName}`}
                 subtitle={post.location}
                 userPicturePath={post.userPicturePath}
+                postId={post._id}
             />
             <Typography color={main} sx={{ mt: "1rem" }}>
                 {post.description}
@@ -68,14 +80,36 @@ const PostWidget = ({ post }) => {
                 <FlexBetween gap="1rem">
                     {/* LIKE */}
                     <FlexBetween>
-                        <IconButton onClick={patchLike}>
+                        {/* <IconButton onClick={patchLike}>
                             {isLiked ? (
                                 <FavoriteOutlined sx={{ color: primary }} />
                             ) : (
                                 <FavoriteBorderOutlined />
                             )}
-                        </IconButton>
-                        <Typography>{likeCount}</Typography>
+                        </IconButton> */}
+                        {isLiked ? (
+                            <Checkbox
+                                onClick={patchLike}
+                                defaultChecked
+                                icon={<FavoriteBorderOutlined />}
+                                checkedIcon={
+                                    <FavoriteOutlined sx={{ color: primary }} />
+                                }
+                            />
+                        ) : (
+                            <Checkbox
+                                onClick={patchLike}
+                                icon={<FavoriteBorderOutlined />}
+                                checkedIcon={
+                                    <FavoriteOutlined sx={{ color: primary }} />
+                                }
+                            />
+                        )}
+                        {lodaing ? (
+                            <CircularProgress color="primary" size={15} />
+                        ) : (
+                            <Typography>{likeCount}</Typography>
+                        )}
                     </FlexBetween>
                     {/* COMMENTS */}
                     <FlexBetween gap="0.3rem">

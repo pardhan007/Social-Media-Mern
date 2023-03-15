@@ -1,19 +1,27 @@
-import { PersonAddOutlined, PersonRemoveOutlined } from "@mui/icons-material";
+import {
+    MoreVert,
+    PersonAddOutlined,
+    PersonRemoveOutlined,
+} from "@mui/icons-material";
 import {
     Box,
     CircularProgress,
+    ClickAwayListener,
     IconButton,
+    MenuItem,
+    MenuList,
+    Paper,
     Typography,
     useTheme,
 } from "@mui/material";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { setFriends } from "state/State";
+import { setFriends, setPosts } from "state/State";
 import FlexBetween from "./FlexBetween";
 import UserImage from "./UserImage";
 
-const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
+const Friend = ({ friendId, name, subtitle, userPicturePath, postId }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const userId = useSelector((state) => state.user._id);
@@ -23,6 +31,7 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
 
     // console.log(friends);
     const [loading, setLoading] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
     const { palette } = useTheme();
     const primaryLight = palette.primary.light;
     const primaryDark = palette.primary.dark;
@@ -48,6 +57,20 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
         });
         const data = await response.json();
         dispatch(setFriends({ friends: data }));
+        setLoading(false);
+    };
+
+    const deletePost = async () => {
+        setLoading(true);
+        const response = await fetch(`${server}/posts/delete/${postId}`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        });
+        const data = await response.json();
+        dispatch(setPosts({ posts: data }));
         setLoading(false);
     };
 
@@ -91,7 +114,7 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
                     </Typography>
                 </Box>
             </FlexBetween>
-            {userId !== friendId && (
+            {userId !== friendId ? (
                 <IconButton
                     onClick={() => patchFriend()}
                     sx={{
@@ -111,6 +134,35 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
                         <PersonAddOutlined sx={{ color: primaryDark }} />
                     )}
                 </IconButton>
+            ) : (
+                <div>
+                    <IconButton>
+                        <MoreVert onClick={() => setMenuOpen(!menuOpen)} />
+                    </IconButton>
+                    {menuOpen && (
+                        <Paper
+                            sx={{
+                                position: "absolute",
+                                zIndex: "100",
+                            }}
+                        >
+                            <ClickAwayListener
+                                onClickAway={() => setMenuOpen(!menuOpen)}
+                            >
+                                <MenuList>
+                                    <MenuItem
+                                        onClick={() => setMenuOpen(!menuOpen)}
+                                    >
+                                        Edit
+                                    </MenuItem>
+                                    <MenuItem onClick={deletePost}>
+                                        Delete
+                                    </MenuItem>
+                                </MenuList>
+                            </ClickAwayListener>
+                        </Paper>
+                    )}
+                </div>
             )}
         </FlexBetween>
     );

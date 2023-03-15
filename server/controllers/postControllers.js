@@ -75,3 +75,21 @@ export const likePost = async (req, res) => {
         res.status(404).json({ message: err.message });
     }
 };
+
+export const deletePost = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!id) {
+            return res.status(404).send(`No id Provided: ${id}`);
+        }
+
+        await Post.findByIdAndRemove(id);
+
+        const allPosts = await Post.find().sort({ createdAt: -1 });
+
+        res.status(200).json(allPosts);
+    } catch (err) {
+        res.status(404).json({ message: err.message });
+    }
+};
