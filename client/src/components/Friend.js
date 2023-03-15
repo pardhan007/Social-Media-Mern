@@ -134,10 +134,12 @@ const Friend = ({ friendId, name, subtitle, userPicturePath, postId }) => {
                         <PersonAddOutlined sx={{ color: primaryDark }} />
                     )}
                 </IconButton>
+            ) : loading ? (
+                <CircularProgress color="primary" size={20} />
             ) : (
                 <div>
-                    <IconButton>
-                        <MoreVert onClick={() => setMenuOpen(!menuOpen)} />
+                    <IconButton onClick={() => setMenuOpen(!menuOpen)}>
+                        <MoreVert />
                     </IconButton>
                     {menuOpen && (
                         <Paper
