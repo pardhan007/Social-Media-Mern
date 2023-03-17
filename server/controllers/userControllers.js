@@ -47,6 +47,32 @@ export const getUserFriends = async (req, res) => {
     }
 };
 
+export const allUsers = async (req, res) => {
+    try {
+        const keyword = req.query.search
+            ? {
+                  $or: [
+                      // if any of query exist then it's gonna return true
+                      {
+                          firstName: {
+                              $regex: req.query.search,
+                              $options: "i",
+                          },
+                      },
+                      { email: { $regex: req.query.search, $options: "i" } },
+                  ],
+              }
+            : {};
+        // console.log(keyword);
+        const users = await User.find(keyword).find({
+            _id: { $ne: req.user._id },
+        });
+        res.status(200).json(users);
+    } catch (err) {
+        res.status(404).json({ message: err.message });
+    }
+};
+
 /* UPDATE */
 
 export const addRemoveFriend = async (req, res) => {

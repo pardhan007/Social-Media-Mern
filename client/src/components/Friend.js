@@ -139,7 +139,7 @@ const Friend = ({ friendId, name, subtitle, userPicturePath, postId }) => {
             ) : (
                 <div>
                     <IconButton onClick={() => setMenuOpen(!menuOpen)}>
-                        <MoreVert />
+                        {postId && <MoreVert />}
                     </IconButton>
                     {menuOpen && (
                         <Paper

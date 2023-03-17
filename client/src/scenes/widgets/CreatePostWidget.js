@@ -239,7 +239,7 @@ const CreatePostWidget = ({ picturePath }) => {
                     </>
                 )}
                 <Button
-                    disabled={!postDescription}
+                    disabled={!postDescription || imageUploadLoading}
                     onClick={handlePost}
                     sx={{
                         color: palette.background.alt,

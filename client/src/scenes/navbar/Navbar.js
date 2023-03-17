@@ -4,10 +4,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
     Box,
+    CircularProgress,
+    ClickAwayListener,
     FormControl,
     IconButton,
     InputBase,
     MenuItem,
+    Paper,
     Select,
     Typography,
     useMediaQuery,
@@ -22,15 +25,23 @@ import {
     Search,
     Menu,
     Close,
+    CloseOutlined,
 } from "@mui/icons-material";
 import { setLogout, setMode } from "state/State";
+import Friend from "components/Friend";
 
 const Navbar = () => {
     const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [searchResult, setSearchResult] = useState([]);
+    const [searchResultBox, setSearchResultBox] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const user = useSelector((state) => state.user);
+    const server = useSelector((state) => state.server);
+    const token = useSelector((state) => state.token);
     const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
+    const isGreaterThan500px = useMediaQuery("(min-width: 500px)");
 
     // tells current display size is below this min-width or higher
 
@@ -42,35 +53,137 @@ const Navbar = () => {
 
     const fullName = `${user.firstName} ${user.lastName}`;
 
+    const handleSearch = async (query) => {
+        try {
+            setLoading(true);
+            const response = await fetch(
+                `${server}/users/allusers?search=${query}`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            const data = await response.json();
+            console.log(data);
+            setLoading(false);
+            setSearchResult(data);
+        } catch (error) {
+            setLoading(false);
+            console.error(error);
+        }
+    };
+
     return (
         <FlexBetween padding="0.7rem 6%" backgroundColor={alt}>
             <FlexBetween gap="1.75rem">
-                <Typography
-                    fontWeight="bold"
-                    fontSize="clamp(1rem,2rem,2.25rem)"
-                    color="primary"
-                    onClick={() => navigate("/home")}
-                    sx={{
-                        "&:hover": {
-                            cursor: "pointer",
-                        },
-                    }}
-                >
-                    SocioPedia
-                </Typography>
-                {isNonMobileScreens && (
+                {isNonMobileScreens ? (
+                    <Typography
+                        fontWeight="bold"
+                        fontSize="clamp(1rem,2rem,2.25rem)"
+                        color="primary"
+                        onClick={() => navigate("/home")}
+                        sx={{
+                            "&:hover": {
+                                cursor: "pointer",
+                            },
+                        }}
+                    >
+                        SocioPedia
+                    </Typography>
+                ) : (
+                    <Box
+                        display="flex"
+                        sx={{
+                            "&:hover": {
+                                cursor: "pointer",
+                            },
+                        }}
+                    >
+                        <img
+                            src="../assets/logo.png"
+                            alt="logo"
+                            width={45}
+                            onClick={() => navigate("/home")}
+                        />
+                    </Box>
+                )}
+
+                {/* {isNonMobileScreens && ( */}
+                <Box>
                     <FlexBetween
                         backgroundColor={neutralLight}
                         borderRadius="9px"
-                        gap="3rem"
+                        gap={isGreaterThan500px ? "4rem" : "1rem"}
                         padding="0.1rem 0.5rem"
                     >
-                        <InputBase placeholder="Search..." />
+                        <InputBase
+                            placeholder="Search..."
+                            onChange={(e) => handleSearch(e.target.value)}
+                            onClick={() => setSearchResultBox(true)}
+                        />
                         <IconButton>
                             <Search />
                         </IconButton>
                     </FlexBetween>
-                )}
+                    {searchResultBox && (
+                        <ClickAwayListener
+                            onClickAway={() => setSearchResultBox(false)}
+                        >
+                            <Paper
+                                elevation={2}
+                                sx={{
+                                    width: isGreaterThan500px
+                                        ? "350px"
+                                        : "290px",
+                                    position: "absolute",
+                                    zIndex: "1000",
+                                    padding: "0.7rem 1rem",
+                                    gap: "1.5rem",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                }}
+                            >
+                                <FlexBetween>
+                                    <Typography fontWeight="500">
+                                        Search Results
+                                    </Typography>
+                                    <IconButton
+                                        onClick={() =>
+                                            setSearchResultBox(false)
+                                        }
+                                    >
+                                        <CloseOutlined />
+                                    </IconButton>
+                                </FlexBetween>
+
+                                {loading ? (
+                                    <CircularProgress
+                                        color="primary"
+                                        size={30}
+                                    />
+                                ) : (
+                                    searchResult
+                                        ?.slice(0, 4)
+                                        .reverse()
+                                        .map((user) => (
+                                            <Friend
+                                                key={user._id}
+                                                friendId={user._id}
+                                                name={`${user.firstName} ${user.lastName}`}
+                                                subtitle={user.occupation}
+                                                userPicturePath={
+                                                    user.picturePath
+                                                }
+                                            />
+                                        ))
+                                )}
+                            </Paper>
+                        </ClickAwayListener>
+                    )}
+                </Box>
+                {/* )} */}
             </FlexBetween>
 
             {/* DESKTOP NAV */}
