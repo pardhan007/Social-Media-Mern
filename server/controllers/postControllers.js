@@ -76,6 +76,27 @@ export const likePost = async (req, res) => {
     }
 };
 
+export const addComment = async (req, res) => {
+    const { comment, postId } = req.body;
+
+    const added = await Post.findByIdAndUpdate(
+        postId,
+        {
+            $push: { comments: comment },
+        },
+        {
+            new: true,
+        }
+    );
+
+    if (!added) {
+        res.status(404);
+        throw new Error("comment not added");
+    } else {
+        res.status(201).json(added);
+    }
+};
+
 export const deletePost = async (req, res) => {
     try {
         const { id } = req.params;

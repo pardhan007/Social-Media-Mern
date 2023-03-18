@@ -2,6 +2,7 @@ import {
     ChatBubbleOutlineOutlined,
     FavoriteBorderOutlined,
     FavoriteOutlined,
+    Send,
     ShareOutlined,
 } from "@mui/icons-material";
 import {
@@ -10,11 +11,13 @@ import {
     CircularProgress,
     Divider,
     IconButton,
+    InputBase,
     Typography,
     useTheme,
 } from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
+import UserImage from "components/UserImage";
 import WidgetWrapper from "components/WidgetWrapper";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,6 +25,7 @@ import { setPost } from "state/State";
 
 const PostWidget = ({ post }) => {
     const [isComments, setIsComments] = useState(false);
+    const [textComment, setTextComment] = useState("");
     // console.log(post);
     const dispatch = useDispatch();
     const token = useSelector((state) => state.token);
@@ -29,7 +33,9 @@ const PostWidget = ({ post }) => {
     const server = useSelector((state) => state.server);
     const isLiked = Boolean(post.likes[loggedInUserId]);
     const likeCount = Object.keys(post.likes).length;
-    const [lodaing, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [loadingComment, setLoadingComment] = useState(false);
+    const [viewMore, setViewMore] = useState(false);
 
     const { palette } = useTheme();
     const main = palette.neutral.main;
@@ -48,6 +54,24 @@ const PostWidget = ({ post }) => {
         const updatedPost = await response.json();
         dispatch(setPost({ post: updatedPost }));
         setLoading(false);
+    };
+
+    const handleComment = async () => {
+        setLoadingComment(true);
+        const data = { comment: textComment, postId: post._id };
+
+        const response = await fetch(`${server}/posts/comment`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+        const updatedPost = await response.json();
+        dispatch(setPost({ post: updatedPost }));
+        setTextComment("");
+        setLoadingComment(false);
     };
 
     return (
@@ -105,7 +129,7 @@ const PostWidget = ({ post }) => {
                                 }
                             />
                         )}
-                        {lodaing ? (
+                        {loading ? (
                             <CircularProgress color="primary" size={15} />
                         ) : (
                             <Typography>{likeCount}</Typography>
@@ -123,23 +147,77 @@ const PostWidget = ({ post }) => {
                     <ShareOutlined />
                 </IconButton>
             </FlexBetween>
+
             {isComments && (
                 <Box mt="0.5rem">
-                    {post.comments.map((comment, i) => (
-                        <Box key={`${post.firstName} ${post.lastName}-${i}`}>
-                            <Divider />
-                            <Typography
-                                sx={{
-                                    color: main,
-                                    margin: "0.5rem 0",
-                                    paddingLeft: "1rem",
-                                }}
-                            >
-                                {comment}
-                            </Typography>
-                        </Box>
-                    ))}
                     <Divider />
+                    <Box display="flex" alignItems="center" gap="0.7rem">
+                        <UserImage image={post.userPicturePath} size="40" />
+                        <FlexBetween
+                            border={`1px solid ${palette.neutral.medium}`}
+                            borderRadius="50px"
+                            gap="3rem"
+                            padding="0rem 0.7rem"
+                            margin="1rem 0"
+                            width="100%"
+                        >
+                            <InputBase
+                                fullWidth
+                                value={textComment}
+                                placeholder="Add a comment..."
+                                onChange={(e) => setTextComment(e.target.value)}
+                            />
+                            {/* {textComment && ( */}
+                            <IconButton
+                                onClick={handleComment}
+                                disabled={!textComment.trim()}
+                            >
+                                {loadingComment ? (
+                                    <CircularProgress
+                                        color="primary"
+                                        size={18}
+                                    />
+                                ) : (
+                                    <Send />
+                                )}
+                            </IconButton>
+                            {/* )} */}
+                        </FlexBetween>
+                    </Box>
+                    {post.comments
+                        ?.slice(0, post.comments.length)
+                        .reverse()
+                        .slice(0, viewMore ? post.comments.length : 3)
+                        .map((comment, i) => (
+                            <Box
+                                key={`${post.firstName} ${post.lastName}-${i}`}
+                            >
+                                <Divider />
+                                <Typography
+                                    sx={{
+                                        color: main,
+                                        margin: "0.5rem 0",
+                                        paddingLeft: "1rem",
+                                    }}
+                                >
+                                    {comment}
+                                </Typography>
+                            </Box>
+                        ))}
+                    <Divider />
+                    <Typography
+                        color={palette.primary.main}
+                        mt="0.5rem"
+                        onClick={() => setViewMore(!viewMore)}
+                        sx={{
+                            "&:hover": {
+                                cursor: "pointer",
+                            },
+                        }}
+                    >
+                        {post.comments.length > 3 &&
+                            (viewMore ? "View Less" : "View More")}
+                    </Typography>
                 </Box>
             )}
         </WidgetWrapper>
