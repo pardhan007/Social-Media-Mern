@@ -158,7 +158,7 @@ const PostWidget = ({ post }) => {
                 <Box mt="0.5rem">
                     <Divider />
                     <Box display="flex" alignItems="center" gap="0.7rem">
-                        <UserImage image={post.userPicturePath} size="35" />
+                        <UserImage image={user.picturePath} size="35" />
                         <FlexBetween
                             borderRadius="50px"
                             gap="3rem"

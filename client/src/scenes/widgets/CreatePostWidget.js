@@ -24,9 +24,10 @@ import WidgetWrapper from "components/WidgetWrapper";
 import { useState } from "react";
 import Dropzone from "react-dropzone";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { setPosts } from "state/State";
 
-const CreatePostWidget = ({ picturePath }) => {
+const CreatePostWidget = () => {
     const [loading, setLoading] = useState(false);
     const [imageUploadLoading, setImageUploadLoading] = useState(false);
     const dispatch = useDispatch();
@@ -36,11 +37,13 @@ const CreatePostWidget = ({ picturePath }) => {
     const [postDescription, setPostsDescription] = useState("");
     const { palette } = useTheme();
     const { _id } = useSelector((state) => state.user);
+    const userPicturePath = useSelector((state) => state.user.picturePath);
     const token = useSelector((state) => state.token);
     const server = useSelector((state) => state.server);
     const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
     const mediumMain = palette.neutral.mediumMain;
     const medium = palette.neutral.medium;
+    const navigate = useNavigate();
 
     const handlePost = async () => {
         setLoading(true);
@@ -66,6 +69,7 @@ const CreatePostWidget = ({ picturePath }) => {
         setIsImage(false);
         setImageName("");
         setPostsDescription("");
+        navigate("/home");
     };
 
     const picUpload = async (pics) => {
@@ -103,7 +107,7 @@ const CreatePostWidget = ({ picturePath }) => {
     return (
         <WidgetWrapper>
             <FlexBetween gap="1.5rem">
-                <UserImage image={picturePath} />
+                <UserImage image={userPicturePath} />
                 <InputBase
                     placeholder="What's on your mind..."
                     onChange={(e) => setPostsDescription(e.target.value)}
