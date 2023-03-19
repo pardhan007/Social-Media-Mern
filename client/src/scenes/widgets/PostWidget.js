@@ -26,11 +26,12 @@ import { setPost } from "state/State";
 const PostWidget = ({ post }) => {
     const [isComments, setIsComments] = useState(false);
     const [textComment, setTextComment] = useState("");
-    // console.log(post);
+
     const dispatch = useDispatch();
     const token = useSelector((state) => state.token);
     const loggedInUserId = useSelector((state) => state.user._id);
     const server = useSelector((state) => state.server);
+    const user = useSelector((state) => state.user);
     const isLiked = Boolean(post.likes[loggedInUserId]);
     const likeCount = Object.keys(post.likes).length;
     const [loading, setLoading] = useState(false);
@@ -58,7 +59,12 @@ const PostWidget = ({ post }) => {
 
     const handleComment = async () => {
         setLoadingComment(true);
-        const data = { comment: textComment, postId: post._id };
+        const data = {
+            userName: `${user.firstName} ${user.lastName}`,
+            userPicturePath: user.picturePath,
+            textComment: textComment,
+            postId: post._id,
+        };
 
         const response = await fetch(`${server}/posts/comment`, {
             method: "POST",
@@ -152,14 +158,16 @@ const PostWidget = ({ post }) => {
                 <Box mt="0.5rem">
                     <Divider />
                     <Box display="flex" alignItems="center" gap="0.7rem">
-                        <UserImage image={post.userPicturePath} size="40" />
+                        <UserImage image={post.userPicturePath} size="35" />
                         <FlexBetween
-                            border={`1px solid ${palette.neutral.medium}`}
                             borderRadius="50px"
                             gap="3rem"
                             padding="0rem 0.7rem"
                             margin="1rem 0"
                             width="100%"
+                            sx={{
+                                backgroundColor: palette.neutral.light,
+                            }}
                         >
                             <InputBase
                                 fullWidth
@@ -167,7 +175,6 @@ const PostWidget = ({ post }) => {
                                 placeholder="Add a comment..."
                                 onChange={(e) => setTextComment(e.target.value)}
                             />
-                            {/* {textComment && ( */}
                             <IconButton
                                 onClick={handleComment}
                                 disabled={!textComment.trim()}
@@ -181,30 +188,44 @@ const PostWidget = ({ post }) => {
                                     <Send />
                                 )}
                             </IconButton>
-                            {/* )} */}
                         </FlexBetween>
                     </Box>
+
                     {post.comments
                         ?.slice(0, post.comments.length)
                         .reverse()
                         .slice(0, viewMore ? post.comments.length : 3)
                         .map((comment, i) => (
-                            <Box
-                                key={`${post.firstName} ${post.lastName}-${i}`}
-                            >
-                                <Divider />
-                                <Typography
+                            <Box display="flex" gap="1rem" mb="0.7rem">
+                                <UserImage
+                                    image={comment.userPicturePath}
+                                    size={35}
+                                />
+                                <Box
+                                    key={`${post.firstName} ${post.lastName}-${i}`}
+                                    borderRadius="0.8rem"
+                                    padding="0.2rem 0.7rem"
+                                    gap="3rem"
+                                    minWidth="6rem"
+                                    maxWidth="29.5rem"
                                     sx={{
-                                        color: main,
-                                        margin: "0.5rem 0",
-                                        paddingLeft: "1rem",
+                                        backgroundColor: palette.neutral.light,
+                                        overflowWrap: "break-word",
                                     }}
                                 >
-                                    {comment}
-                                </Typography>
+                                    <Typography fontWeight="500">
+                                        {comment.userName}
+                                    </Typography>
+                                    <Typography
+                                        sx={{
+                                            color: main,
+                                        }}
+                                    >
+                                        {comment.textComment}
+                                    </Typography>
+                                </Box>
                             </Box>
                         ))}
-                    <Divider />
                     <Typography
                         color={palette.primary.main}
                         mt="0.5rem"

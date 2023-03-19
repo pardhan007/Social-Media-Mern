@@ -77,12 +77,18 @@ export const likePost = async (req, res) => {
 };
 
 export const addComment = async (req, res) => {
-    const { comment, postId } = req.body;
+    const { userName, userPicturePath, textComment, postId } = req.body;
+
+    const data = {
+        userName: userName,
+        userPicturePath: userPicturePath,
+        textComment: textComment,
+    };
 
     const added = await Post.findByIdAndUpdate(
         postId,
         {
-            $push: { comments: comment },
+            $push: { comments: data },
         },
         {
             new: true,
