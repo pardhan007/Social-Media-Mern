@@ -80,6 +80,12 @@ const PostWidget = ({ post }) => {
         setLoadingComment(false);
     };
 
+    const handleKeypress = (e) => {
+        if (e.keyCode === 13) {
+            handleComment();
+        }
+    };
+
     return (
         <WidgetWrapper m="2rem 0">
             <Friend
@@ -168,6 +174,7 @@ const PostWidget = ({ post }) => {
                             sx={{
                                 backgroundColor: palette.neutral.light,
                             }}
+                            onKeyDown={(e) => handleKeypress(e)}
                         >
                             <InputBase
                                 fullWidth

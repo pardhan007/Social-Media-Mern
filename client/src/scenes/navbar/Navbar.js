@@ -90,7 +90,7 @@ const Navbar = () => {
                             },
                         }}
                     >
-                        SocioPedia
+                        Connectify
                     </Typography>
                 ) : (
                     <Box
