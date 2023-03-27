@@ -24,6 +24,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state/State";
 
 const PostWidget = ({ post }) => {
+    // console.log(post);
     const [isComments, setIsComments] = useState(false);
     const [textComment, setTextComment] = useState("");
 
@@ -94,6 +95,7 @@ const PostWidget = ({ post }) => {
                 subtitle={post.location}
                 userPicturePath={post.userPicturePath}
                 postId={post._id}
+                createdAt={post.createdAt}
             />
             <Typography color={main} sx={{ mt: "1rem" }}>
                 {post.description}

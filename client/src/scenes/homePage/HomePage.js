@@ -12,8 +12,18 @@ const HomePage = () => {
 
     return (
         <Box>
-            <Navbar />
             <Box
+                sx={{
+                    position: "fixed",
+                    width: "100%",
+                    top: 0,
+                    zIndex: "10000",
+                }}
+            >
+                <Navbar />
+            </Box>
+            <Box
+                marginTop="4rem"
                 width="100%"
                 padding="2rem 4%"
                 display={isNonMobileScreens ? "flex" : "block"}
