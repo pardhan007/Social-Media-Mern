@@ -67,8 +67,8 @@ const Friend = ({
     const { palette } = useTheme();
     const primaryLight = palette.primary.light;
     const primaryDark = palette.primary.dark;
-    const main = palette.neutral.main;
     const medium = palette.neutral.medium;
+    const dark = palette.neutral.dark;
 
     const isFriend = friends.find((friend) => friend._id === friendId);
 
@@ -131,7 +131,7 @@ const Friend = ({
                     }}
                 >
                     <Typography
-                        color={main}
+                        color={dark}
                         variant="h5"
                         fontWeight="500"
                         sx={{

@@ -102,15 +102,15 @@ const UserWidget = ({ userId, picturePath }) => {
 
             <Box p="1rem 0">
                 <Box display="flex" alignItems="center" gap="1rem" mb="0.5rem">
-                    <LocationOnOutlined fontSize="large" sx={{ color: main }} />
-                    <Typography color={medium}>{location}</Typography>
+                    <LocationOnOutlined fontSize="large" sx={{ color: dark }} />
+                    <Typography color={main}>{location}</Typography>
                 </Box>
                 <Box display="flex" alignItems="center" gap="1rem">
                     <WorkOutlineOutlined
                         fontSize="large"
-                        sx={{ color: main }}
+                        sx={{ color: dark }}
                     />
-                    <Typography color={medium}>{occupation}</Typography>
+                    <Typography color={main}>{occupation}</Typography>
                 </Box>
             </Box>
 
@@ -120,20 +120,16 @@ const UserWidget = ({ userId, picturePath }) => {
 
             <Box p="1rem 0">
                 <FlexBetween mb="0.5rem">
-                    <Typography color={medium}>
+                    <Typography color={dark} fontWeight="500">
                         Who's viewed your profile
                     </Typography>
-                    <Typography color={main} fontWeight="500">
-                        {viewedProfile}
-                    </Typography>
+                    <Typography color={main}>{viewedProfile}</Typography>
                 </FlexBetween>
                 <FlexBetween>
-                    <Typography color={medium}>
+                    <Typography color={dark} fontWeight="500">
                         Impressions on your posts
                     </Typography>
-                    <Typography color={main} fontWeight="500">
-                        {impressions}
-                    </Typography>
+                    <Typography color={main}>{impressions}</Typography>
                 </FlexBetween>
             </Box>
 
@@ -143,7 +139,7 @@ const UserWidget = ({ userId, picturePath }) => {
             <Box p="1rem 0">
                 <Typography
                     fontSize="1rem"
-                    color={main}
+                    color={dark}
                     fontWeight="500"
                     mb="1rem"
                 >
@@ -153,7 +149,7 @@ const UserWidget = ({ userId, picturePath }) => {
                     <FlexBetween gap="1rem">
                         <img src="../assets/twitter.png" alt="twitter" />
                         <Box>
-                            <Typography color={main} fontWeight="500">
+                            <Typography color={dark} fontWeight="500">
                                 Twitter
                             </Typography>
                             <Typography color={medium}>
@@ -161,14 +157,14 @@ const UserWidget = ({ userId, picturePath }) => {
                             </Typography>
                         </Box>
                     </FlexBetween>
-                    <EditOutlined color={main} />
+                    <EditOutlined color={dark} />
                 </FlexBetween>
 
                 <FlexBetween gap="1rem">
                     <FlexBetween gap="1rem">
                         <img src="../assets/linkedin.png" alt="linkedin" />
                         <Box>
-                            <Typography color={main} fontWeight="500">
+                            <Typography color={dark} fontWeight="500">
                                 Linkedin
                             </Typography>
                             <Typography color={medium}>
@@ -176,7 +172,7 @@ const UserWidget = ({ userId, picturePath }) => {
                             </Typography>
                         </Box>
                     </FlexBetween>
-                    <EditOutlined color={main} />
+                    <EditOutlined color={dark} />
                 </FlexBetween>
             </Box>
         </WidgetWrapper>
