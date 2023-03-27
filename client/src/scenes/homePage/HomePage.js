@@ -17,7 +17,7 @@ const HomePage = () => {
                     position: "fixed",
                     width: "100%",
                     top: 0,
-                    zIndex: "10000",
+                    zIndex: "101",
                 }}
             >
                 <Navbar />
