@@ -1,2 +1,2 @@
-# Social-Media-Mern
-A Social Media Application 
+# Connectify
+A Social Media Application
