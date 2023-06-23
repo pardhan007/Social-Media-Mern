@@ -1,2 +1,2 @@
 # Connectify
-A Social Media Application
+A Social Media Application Using MERN stack
