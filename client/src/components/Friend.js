@@ -194,11 +194,11 @@ const Friend = ({
                                 onClickAway={() => setMenuOpen(!menuOpen)}
                             >
                                 <MenuList>
-                                    <MenuItem
+                                    {/* <MenuItem
                                         onClick={() => setMenuOpen(!menuOpen)}
                                     >
                                         Edit
-                                    </MenuItem>
+                                    </MenuItem> */}
                                     <MenuItem onClick={deletePost}>
                                         Delete
                                     </MenuItem>
