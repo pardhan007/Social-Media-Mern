@@ -1,4 +1,5 @@
 import {
+    Cancel,
     Check,
     EditOutlined,
     LocationOnOutlined,
@@ -8,6 +9,7 @@ import {
 import {
     Box,
     Button,
+    CircularProgress,
     Divider,
     IconButton,
     Input,
@@ -18,16 +20,19 @@ import FlexBetween from "components/FlexBetween";
 import UserImage from "components/UserImage";
 import WidgetWrapper from "components/WidgetWrapper.js";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { updateUserDetail } from "state/State";
 
 const UserWidget = ({ userId, picturePath }) => {
     // console.log(picturePath);
     const [user, setUser] = useState(null);
+
     const { palette } = useTheme();
     const navigate = useNavigate();
     const token = useSelector((state) => state.token);
     const loggedInUserId = useSelector((state) => state.user._id);
+    const loggedInUser = useSelector((state) => state.user);
     const server = useSelector((state) => state.server);
     // const friends = useSelector((state) => state.user.friends);
     const dark = palette.neutral.dark;
@@ -37,8 +42,11 @@ const UserWidget = ({ userId, picturePath }) => {
     const [twitterOpen, setTwitterOpen] = useState(false);
     const [linkedinOpen, setLinkedinOpen] = useState(false);
 
-    const [twitterUrl, setTwitterUrl] = useState("");
-    const [linkedinUrl, setLinkedinUrl] = useState("");
+    const [twitterUrl, setTwitterUrl] = useState(loggedInUser.twitter);
+    const [linkedinUrl, setLinkedinUrl] = useState(loggedInUser.linkedin);
+    const dispatch = useDispatch();
+    const [twitterUpdateLoading, setTwitterUpdateLoading] = useState(false);
+    const [linkedinUpdateLoading, setLinkedinUpdateLoading] = useState(false);
 
     const getUser = async () => {
         try {
@@ -57,6 +65,57 @@ const UserWidget = ({ userId, picturePath }) => {
     useEffect(() => {
         getUser();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const handleLinkedin = async () => {
+        setLinkedinUpdateLoading(true);
+        try {
+            let data = {
+                userId: loggedInUserId,
+                linkedinUsername: linkedinUrl,
+            };
+            await fetch(`${server}/users/linkedin/update`, {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            });
+
+            dispatch(updateUserDetail({ linkedin: linkedinUrl }));
+            setLinkedinUpdateLoading(false);
+            setLinkedinOpen(false);
+        } catch (error) {
+            console.error(error);
+            setLinkedinUpdateLoading(false);
+            setLinkedinOpen(false);
+        }
+    };
+    const handleTwitter = async () => {
+        setTwitterUpdateLoading(true);
+        try {
+            let data = {
+                userId: loggedInUserId,
+                twitterUsername: twitterUrl,
+            };
+            await fetch(`${server}/users/twitter/update`, {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            });
+
+            dispatch(updateUserDetail({ twitter: twitterUrl }));
+            setTwitterUpdateLoading(false);
+            setTwitterOpen(false);
+        } catch (error) {
+            console.error(error);
+            setTwitterUpdateLoading(false);
+            setTwitterOpen(false);
+        }
+    };
 
     if (!user) {
         return null;
@@ -169,7 +228,11 @@ const UserWidget = ({ userId, picturePath }) => {
                             {twitterOpen ? (
                                 <Input
                                     placeholder="Enter Twitter Username"
-                                    value={twitterUrl}
+                                    value={
+                                        loggedInUserId === userId
+                                            ? twitterUrl
+                                            : user.twitter
+                                    }
                                     onChange={(e) =>
                                         setTwitterUrl(e.target.value)
                                     }
@@ -180,9 +243,9 @@ const UserWidget = ({ userId, picturePath }) => {
                                     color="primary"
                                     variant="contained"
                                 >
-                                    {twitterUrl ? (
+                                    {user.twitter ? (
                                         <a
-                                            href={`https://twitter.com/${twitterUrl}`}
+                                            href={`https://twitter.com/${user.twitter}`}
                                             target="_blank"
                                             rel="noreferrer"
                                             style={{ textDecoration: "none" }}
@@ -198,17 +261,33 @@ const UserWidget = ({ userId, picturePath }) => {
                             )}
                         </Box>
                     </FlexBetween>
-                    {loggedInUserId === _id && (
-                        <IconButton
-                            onClick={() => setTwitterOpen(!twitterOpen)}
-                        >
-                            {twitterOpen ? (
-                                <Check color="primary" />
-                            ) : (
+                    {loggedInUserId === _id &&
+                        (twitterOpen ? (
+                            <div style={{ display: "flex", gap: "0.1rem" }}>
+                                <IconButton
+                                    onClick={() => setTwitterOpen(false)}
+                                >
+                                    <Cancel color={dark} />
+                                </IconButton>
+                                <IconButton
+                                    onClick={handleTwitter}
+                                    disabled={user.twitter === twitterUrl}
+                                >
+                                    {twitterUpdateLoading ? (
+                                        <CircularProgress
+                                            color="error"
+                                            size={20}
+                                        />
+                                    ) : (
+                                        <Check color="primary" />
+                                    )}
+                                </IconButton>
+                            </div>
+                        ) : (
+                            <IconButton onClick={() => setTwitterOpen(true)}>
                                 <EditOutlined color={dark} />
-                            )}
-                        </IconButton>
-                    )}
+                            </IconButton>
+                        ))}
                 </FlexBetween>
 
                 <FlexBetween gap="1rem">
@@ -218,7 +297,11 @@ const UserWidget = ({ userId, picturePath }) => {
                             {linkedinOpen ? (
                                 <Input
                                     placeholder="Enter Linkedin Username"
-                                    value={linkedinUrl}
+                                    value={
+                                        loggedInUserId === userId
+                                            ? linkedinUrl
+                                            : user.linkedin
+                                    }
                                     onChange={(e) =>
                                         setLinkedinUrl(e.target.value)
                                     }
@@ -229,9 +312,9 @@ const UserWidget = ({ userId, picturePath }) => {
                                     color="primary"
                                     variant="contained"
                                 >
-                                    {linkedinUrl ? (
+                                    {user.linkedin ? (
                                         <a
-                                            href={`https://www.linkedin.com/in/${linkedinUrl}`}
+                                            href={`https://www.linkedin.com/in/${user.linkedin}`}
                                             target="_blank"
                                             rel="noreferrer"
                                             style={{ textDecoration: "none" }}
@@ -247,17 +330,33 @@ const UserWidget = ({ userId, picturePath }) => {
                             )}
                         </Box>
                     </FlexBetween>
-                    {loggedInUserId === _id && (
-                        <IconButton
-                            onClick={() => setLinkedinOpen(!linkedinOpen)}
-                        >
-                            {linkedinOpen ? (
-                                <Check color="primary" />
-                            ) : (
+                    {loggedInUserId === _id &&
+                        (linkedinOpen ? (
+                            <div style={{ display: "flex", gap: "0.1rem" }}>
+                                <IconButton
+                                    onClick={() => setLinkedinOpen(false)}
+                                >
+                                    <Cancel color={dark} />
+                                </IconButton>
+                                <IconButton
+                                    onClick={handleLinkedin}
+                                    disabled={user.linkedin === linkedinUrl}
+                                >
+                                    {linkedinUpdateLoading ? (
+                                        <CircularProgress
+                                            color="error"
+                                            size={20}
+                                        />
+                                    ) : (
+                                        <Check color="primary" />
+                                    )}
+                                </IconButton>
+                            </div>
+                        ) : (
+                            <IconButton onClick={() => setLinkedinOpen(true)}>
                                 <EditOutlined color={dark} />
-                            )}
-                        </IconButton>
-                    )}
+                            </IconButton>
+                        ))}
                 </FlexBetween>
             </Box>
         </WidgetWrapper>

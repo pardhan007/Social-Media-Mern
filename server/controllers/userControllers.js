@@ -123,3 +123,39 @@ export const addRemoveFriend = async (req, res) => {
         res.status(404).json({ message: err.message });
     }
 };
+
+export const updateTwitter = async (req, res) => {
+    try {
+        const { userId, twitterUsername } = req.body;
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            {
+                twitter: twitterUsername,
+            },
+            {
+                new: true,
+            }
+        ).select("-password");
+        res.status(200).json(updatedUser);
+    } catch (err) {
+        res.status(404).json({ message: err.message });
+    }
+};
+
+export const updateLinkedin = async (req, res) => {
+    try {
+        const { userId, linkedinUsername } = req.body;
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            {
+                linkedin: linkedinUsername,
+            },
+            {
+                new: true,
+            }
+        ).select("-password");
+        res.status(200).json(updatedUser);
+    } catch (err) {
+        res.status(404).json({ message: err.message });
+    }
+};

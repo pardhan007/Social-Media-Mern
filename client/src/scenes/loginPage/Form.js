@@ -62,7 +62,7 @@ const Form = () => {
     const picUpload = async (pics) => {
         // console.log(pics);
         if (pics === undefined) {
-            return;
+            return "";
         }
         if (
             pics.type === "image/jpeg" ||

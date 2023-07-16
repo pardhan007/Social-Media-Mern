@@ -26,13 +26,21 @@ const UserSchema = new mongoose.Schema(
             min: 5,
         },
         picturePath: {
-            type: "String",
+            type: String,
             default:
                 "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
         },
         friends: {
             type: Array,
             default: [],
+        },
+        twitter:{
+            type: String,
+            default: "",
+        },
+        linkedin:{
+            type: String,
+            default: "",
         },
         location: String,
         occupation: String,

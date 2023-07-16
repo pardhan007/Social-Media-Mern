@@ -26,7 +26,6 @@ export const register = async (req, res) => {
 
         const salt = await bcrypt.genSalt();
         const passwordHash = await bcrypt.hash(password, salt);
-
         const newUser = new User({
             firstName,
             lastName,
@@ -73,6 +72,8 @@ export const login = async (req, res) => {
             email: user.email,
             picturePath: user.picturePath,
             friends: user.friends,
+            twitter: user.twitter,
+            linkedin: user.linkedin,
             token: generateToken(user._id),
         });
     } catch (err) {

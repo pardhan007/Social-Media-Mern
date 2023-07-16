@@ -45,10 +45,22 @@ export const authSlice = createSlice({
             });
             state.posts = updatedPost;
         },
+        updateUserDetail: (state, action) => {
+            const keys = Object.keys(action.payload);
+            const updateKey = keys[0];
+            state.user[updateKey] = action.payload[updateKey];
+        },
     },
 });
 
-export const { setMode, setLogin, setLogout, setFriends, setPosts, setPost } =
-    authSlice.actions;
+export const {
+    setMode,
+    setLogin,
+    setLogout,
+    setFriends,
+    setPosts,
+    setPost,
+    updateUserDetail,
+} = authSlice.actions;
 
 export default authSlice.reducer;
