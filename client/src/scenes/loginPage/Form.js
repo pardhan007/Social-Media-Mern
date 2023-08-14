@@ -1,66 +1,73 @@
-import { EditOutlined } from "@mui/icons-material";
+import { Cancel, EditOutlined } from "@mui/icons-material";
+import { LoadingButton } from "@mui/lab";
 import {
     Box,
     Button,
     CircularProgress,
-    TextField,
+    IconButton,
     Typography,
-    useMediaQuery,
-    useTheme,
 } from "@mui/material";
 import FlexBetween from "components/FlexBetween";
-import { Formik } from "formik";
-import { useState } from "react";
+import React, { useState } from "react";
 import Dropzone from "react-dropzone";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import * as yup from "yup";
-import { setLogin } from "state/State.js";
-import { LoadingButton } from "@mui/lab";
+import { setLogin } from "state/State";
 
-const registerSchema = yup.object().shape({
-    firstName: yup.string().required("required"),
-    lastName: yup.string().required("required"),
-    email: yup.string().email("Invalid Email").required("required"),
-    password: yup.string().required("required"),
-    location: yup.string().required("required"),
-    occupation: yup.string().required("required"),
-    picture: yup.string(),
-});
-
-const loginSchema = yup.object().shape({
-    email: yup.string().email("Invalid Email").required("required"),
-    password: yup.string().required("required"),
-});
-
-const initialValuesRegister = {
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    location: "",
-    occupation: "",
-    picture: "",
-};
-
-const initialValuesLogin = {
-    email: "",
-    password: "",
-};
-
-const Form = () => {
+const Form2 = () => {
     const [pageType, setPageType] = useState("login");
-    const { palette } = useTheme();
+    // const { palette } = useTheme();
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const isNonMobile = useMediaQuery("(min-width: 600px)");
+    // const isNonMobile = useMediaQuery("(min-width: 600px)");
     const isLogin = pageType === "login";
     const isRegister = pageType === "register";
     const server = useSelector((state) => state.server);
     const [loading, setLoading] = useState(false);
+    // const [open, setOpen] = useState(false);
+    const [file, setFile] = useState([]);
 
+    const [loginValues, setLoginValues] = useState({
+        email: "",
+        password: "",
+    });
+
+    const [registerValues, setRegisterValues] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        location: "",
+        occupation: "",
+        picturePath: "",
+    });
+
+    function handleLoginValue(e) {
+        setLoginValues((prevState) => {
+            return {
+                ...prevState,
+                [e.target.name]: e.target.value,
+            };
+        });
+    }
+    function handleRegisterValue(e) {
+        setRegisterValues((prevState) => {
+            return {
+                ...prevState,
+                [e.target.name]: e.target.value,
+            };
+        });
+    }
+
+    const handleDirect = () => {
+        setLoginValues((prevState) => {
+            return {
+                email: "guest@example.com",
+                password: "123456",
+            };
+        });
+    };
     const picUpload = async (pics) => {
-        // console.log(pics);
         if (pics === undefined) {
             return "";
         }
@@ -81,44 +88,28 @@ const Form = () => {
             );
             const responseData = await response.json();
             let ans = responseData.url.toString();
+            setRegisterValues((prevState) => {
+                return {
+                    ...prevState,
+                    picturePath: ans,
+                };
+            });
             return ans;
         } else {
             return "";
         }
     };
 
-    const register = async (values, onSubmitProps) => {
-        setLoading(true);
-        let ans = await picUpload(values.picture);
-        delete values["picture"];
-        values = { ...values, picturePath: ans };
-
-        const savedUserResponse = await fetch(`${server}/auth/register`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(values),
-        });
-
-        const savedUser = await savedUserResponse.json();
-        onSubmitProps.resetForm();
-
-        if (savedUser) {
-            setPageType("login");
-        }
-        setLoading(false);
-    };
-    const login = async (values, onSubmitProps) => {
+    const login = async () => {
         setLoading(true);
         const loggedInUserResponse = await fetch(`${server}/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(values),
+            body: JSON.stringify(loginValues),
         });
 
         const loggedIn = await loggedInUserResponse.json();
-        onSubmitProps.resetForm();
-        // console.log(loggedIn);
-        // console.log(loggedIn.token);
+
         if (loggedIn) {
             dispatch(
                 setLogin({
@@ -131,258 +122,283 @@ const Form = () => {
         navigate("/home");
     };
 
-    const handleFormSubmit = async (values, onSubmitProps) => {
-        if (isLogin) await login(values, onSubmitProps);
-        if (isRegister) await register(values, onSubmitProps);
+    const register = async () => {
+        setLoading(true);
+
+        let ans = await picUpload(file[0]);
+
+        const savedUserResponse = await fetch(`${server}/auth/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(registerValues),
+        });
+
+        const savedUser = await savedUserResponse.json();
+        console.log(savedUser);
+        if (savedUser) {
+            setPageType("login");
+        }
+        setLoading(false);
     };
 
+    // console.log(registerValues);
+    // console.log(file);
+    // console.log(file.length);
+
     return (
-        <Formik
-            onSubmit={handleFormSubmit}
-            initialValues={isLogin ? initialValuesLogin : initialValuesRegister}
-            validationSchema={isLogin ? loginSchema : registerSchema}
-        >
-            {({
-                values,
-                errors,
-                touched,
-                handleBlur,
-                handleChange,
-                handleSubmit,
-                setFieldValue,
-                resetForm,
-            }) => (
-                <form onSubmit={handleSubmit}>
-                    <Box
-                        display="grid"
-                        gap="20px"
-                        gridTemplateColumns="repeat(4, minmax(0,1fr))"
+        <Box width="100%" display="flex" justifyContent="center">
+            <Box
+                width="360px"
+                padding="2.5rem 2rem"
+                bgcolor="#FFFFFF"
+                color="black"
+                display="flex"
+                flexDirection="column"
+                gap
+                borderRadius="0.5rem"
+            >
+                <Typography>E-mail address*</Typography>
+                <input
+                    style={{
+                        backgroundColor: "transparent",
+                        borderRadius: "0.3rem",
+                        borderColor: "grey",
+                        borderWidth: "0.2px",
+                        padding: "0.5rem 0.7rem",
+                        fontSize: "0.9rem",
+                    }}
+                    onChange={
+                        pageType === "login"
+                            ? handleLoginValue
+                            : handleRegisterValue
+                    }
+                    value={
+                        pageType === "login"
+                            ? loginValues.email
+                            : registerValues.email
+                    }
+                    name="email"
+                    type="email"
+                    placeholder="example@mail.com"
+                    required
+                />
+                <Typography>Password*</Typography>
+                <input
+                    style={{
+                        backgroundColor: "transparent",
+                        borderRadius: "0.3rem",
+                        borderColor: "grey",
+                        borderWidth: "0.2px",
+                        padding: "0.5rem 0.7rem",
+                        fontSize: "0.9rem",
+                    }}
+                    onChange={
+                        pageType === "login"
+                            ? handleLoginValue
+                            : handleRegisterValue
+                    }
+                    value={
+                        pageType === "login"
+                            ? loginValues.password
+                            : registerValues.password
+                    }
+                    name="password"
+                    type="password"
+                    required
+                />
+                {isRegister && (
+                    <>
+                        <Typography>First Name*</Typography>
+                        <input
+                            style={{
+                                backgroundColor: "transparent",
+                                borderRadius: "0.3rem",
+                                borderColor: "grey",
+                                borderWidth: "0.2px",
+                                padding: "0.5rem 0.7rem",
+                                fontSize: "0.9rem",
+                            }}
+                            onChange={
+                                pageType === "login"
+                                    ? handleLoginValue
+                                    : handleRegisterValue
+                            }
+                            value={registerValues.firstName}
+                            type="text"
+                            name="firstName"
+                            required
+                            placeholder="e.g - Harsh"
+                        />
+                        <Typography>Last Name*</Typography>
+                        <input
+                            style={{
+                                backgroundColor: "transparent",
+                                borderRadius: "0.3rem",
+                                borderColor: "grey",
+                                borderWidth: "0.2px",
+                                padding: "0.5rem 0.7rem",
+                                fontSize: "0.9rem",
+                            }}
+                            onChange={
+                                pageType === "login"
+                                    ? handleLoginValue
+                                    : handleRegisterValue
+                            }
+                            value={registerValues.lastName}
+                            type="text"
+                            name="lastName"
+                            required
+                            placeholder="e.g - prajapati"
+                        />
+                        <Typography>Location*</Typography>
+                        <input
+                            style={{
+                                backgroundColor: "transparent",
+                                borderRadius: "0.3rem",
+                                borderColor: "grey",
+                                borderWidth: "0.2px",
+                                padding: "0.5rem 0.7rem",
+                                fontSize: "0.9rem",
+                            }}
+                            onChange={
+                                pageType === "login"
+                                    ? handleLoginValue
+                                    : handleRegisterValue
+                            }
+                            value={registerValues.location}
+                            type="text"
+                            name="location"
+                            required
+                            placeholder="e.g - Delhi,Haryana"
+                        />
+                        <Typography>Occupation*</Typography>
+                        <input
+                            style={{
+                                backgroundColor: "transparent",
+                                borderRadius: "0.3rem",
+                                borderColor: "grey",
+                                borderWidth: "0.2px",
+                                padding: "0.5rem 0.7rem",
+                                fontSize: "1rem",
+                            }}
+                            onChange={
+                                pageType === "login"
+                                    ? handleLoginValue
+                                    : handleRegisterValue
+                            }
+                            value={registerValues.occupation}
+                            type="text"
+                            name="occupation"
+                            required
+                            placeholder="e.g - Tester, Student"
+                        />
+                        <Typography>Profile Picture</Typography>
+                        <Box display="flex">
+                            <Dropzone
+                                acceptedFiles=".jpg, .jpeg, .png"
+                                multiple={false}
+                                onDrop={(acceptedFiles) =>
+                                    setFile((previousFiles) => [
+                                        ...acceptedFiles.map((file) =>
+                                            Object.assign(file, {
+                                                preview:
+                                                    URL.createObjectURL(file),
+                                            })
+                                        ),
+                                    ])
+                                }
+                            >
+                                {({ getRootProps, getInputProps }) => (
+                                    <Box
+                                        {...getRootProps()}
+                                        border={`1px dashed grey`}
+                                        p="0.6rem 1rem"
+                                        sx={{
+                                            "&:hover": {
+                                                cursor: "pointer",
+                                            },
+                                        }}
+                                        width="100%"
+                                    >
+                                        <input {...getInputProps()} />
+
+                                        {!file.length ? (
+                                            <Typography color="grey">
+                                                Drag 'n' drop file here, or
+                                                click here
+                                            </Typography>
+                                        ) : (
+                                            <FlexBetween>
+                                                <Typography>
+                                                    {file[0].name}
+                                                </Typography>
+                                                <Box display="flex">
+                                                    <IconButton>
+                                                        <EditOutlined color="secondary" />
+                                                    </IconButton>
+                                                </Box>
+                                            </FlexBetween>
+                                        )}
+                                    </Box>
+                                )}
+                            </Dropzone>
+                            {file.length ? (
+                                <IconButton onClick={() => setFile([])}>
+                                    <Cancel color="warning" />
+                                </IconButton>
+                            ) : (
+                                <></>
+                            )}
+                        </Box>
+                    </>
+                )}
+
+                <LoadingButton
+                    sx={{
+                        color: "white",
+                        backgroundColor: "#223134",
+                        borderRadius: "2.5rem",
+                        padding: "0.5rem",
+                        "&:hover": { backgroundColor: "black" },
+                        marginY: "1rem",
+                    }}
+                    loading={loading}
+                    loadingIndicator={
+                        <CircularProgress color="primary" size={20} />
+                    }
+                    onClick={pageType === "login" ? login : register}
+                    type="submit"
+                >
+                    {isLogin ? "Sign in" : "Sign up"}
+                </LoadingButton>
+                {isLogin && (
+                    <Button
+                        onClick={handleDirect}
+                        type="submit"
                         sx={{
-                            "& > div": {
-                                gridColumn: isNonMobile ? undefined : "span 4",
-                            },
+                            mb: "1rem",
+                            padding: "0.5rem",
+                            backgroundColor: "skyblue",
+                            borderRadius: "2.5rem",
+                            color: "black",
+                            "&:hover": { backgroundColor: "#A0C49D" },
                         }}
                     >
-                        {isRegister && (
-                            <>
-                                <TextField
-                                    label="First Name"
-                                    onBlur={handleBlur}
-                                    onChange={handleChange}
-                                    value={values.firstName}
-                                    name="firstName"
-                                    autoComplete="off"
-                                    error={
-                                        Boolean(touched.firstName) &&
-                                        Boolean(errors.firstName)
-                                    }
-                                    helperText={
-                                        touched.firstName && errors.firstName
-                                    }
-                                    sx={{
-                                        gridColumn: "span 2",
-                                    }}
-                                />
-                                <TextField
-                                    label="Last Name"
-                                    onBlur={handleBlur}
-                                    onChange={handleChange}
-                                    value={values.LastName}
-                                    name="lastName"
-                                    autoComplete="off"
-                                    error={
-                                        Boolean(touched.lastName) &&
-                                        Boolean(errors.lastName)
-                                    }
-                                    helperText={
-                                        touched.lastName && errors.lastName
-                                    }
-                                    sx={{
-                                        gridColumn: "span 2",
-                                    }}
-                                />
-                                <TextField
-                                    label="Location"
-                                    onBlur={handleBlur}
-                                    onChange={handleChange}
-                                    value={values.location}
-                                    name="location"
-                                    autoComplete="off"
-                                    error={
-                                        Boolean(touched.location) &&
-                                        Boolean(errors.location)
-                                    }
-                                    helperText={
-                                        touched.location && errors.location
-                                    }
-                                    sx={{
-                                        gridColumn: "span 4",
-                                    }}
-                                />
-                                <TextField
-                                    label="Occupation"
-                                    onBlur={handleBlur}
-                                    onChange={handleChange}
-                                    value={values.occupation}
-                                    name="occupation"
-                                    autoComplete="off"
-                                    error={
-                                        Boolean(touched.occupation) &&
-                                        Boolean(errors.occupation)
-                                    }
-                                    helperText={
-                                        touched.occupation && errors.occupation
-                                    }
-                                    sx={{
-                                        gridColumn: "span 4",
-                                    }}
-                                />
-                                <Box
-                                    gridColumn="span 4"
-                                    border={`1px solid ${palette.neutral.medium}`}
-                                    borderRadius="5px"
-                                    p="1rem"
-                                >
-                                    <Dropzone
-                                        acceptedFiles=".jpg, .jpeg, .png"
-                                        multiple={false}
-                                        onDrop={(acceptedFiles) =>
-                                            setFieldValue(
-                                                "picture",
-                                                acceptedFiles[0]
-                                            )
-                                        }
-                                    >
-                                        {({ getRootProps, getInputProps }) => (
-                                            <Box
-                                                {...getRootProps()}
-                                                border={`2px dashed ${palette.primary.main}`}
-                                                p="0.2rem 1rem"
-                                                sx={{
-                                                    "&:hover": {
-                                                        cursor: "pointer",
-                                                    },
-                                                }}
-                                            >
-                                                <input {...getInputProps()} />
-                                                {!values.picture ? (
-                                                    <p>Add Picture Here</p>
-                                                ) : (
-                                                    <FlexBetween>
-                                                        <Typography>
-                                                            {
-                                                                values.picture
-                                                                    .name
-                                                            }
-                                                        </Typography>
-                                                        <EditOutlined />
-                                                    </FlexBetween>
-                                                )}
-                                            </Box>
-                                        )}
-                                    </Dropzone>
-                                </Box>
-                            </>
-                        )}
-
-                        {/* LOGIN */}
-
-                        <TextField
-                            label="Email"
-                            onBlur={handleBlur}
-                            onChange={handleChange}
-                            value={values.email}
-                            name="email"
-                            autoComplete="off"
-                            error={
-                                Boolean(touched.email) && Boolean(errors.email)
-                            }
-                            helperText={touched.email && errors.email}
-                            sx={{
-                                gridColumn: "span 4",
-                            }}
-                        />
-                        <TextField
-                            label="Password"
-                            type="password"
-                            onBlur={handleBlur}
-                            onChange={handleChange}
-                            value={values.password}
-                            name="password"
-                            autoComplete="off"
-                            error={
-                                Boolean(touched.password) &&
-                                Boolean(errors.password)
-                            }
-                            helperText={touched.password && errors.password}
-                            sx={{
-                                gridColumn: "span 4",
-                            }}
-                        />
-                    </Box>
-                    {/* BUTTONS */}
-
-                    <Box>
-                        <LoadingButton
-                            loading={loading}
-                            loadingIndicator={
-                                <CircularProgress color="error" size={27} />
-                            }
-                            fullWidth
-                            type="submit"
-                            sx={{
-                                mt: "2rem",
-                                mb: "1rem",
-                                p: "1rem",
-                                backgroundColor: palette.primary.main,
-                                color: palette.background.alt,
-                                "&:hover": { color: palette.primary.main },
-                            }}
-                        >
-                            {isLogin ? "LOGIN" : "REGISTER"}
-                        </LoadingButton>
-                        {isLogin && (
-                            <Button
-                                onClick={() => {
-                                    setFieldValue("email", "guest@example.com");
-                                    setFieldValue("password", "123456");
-                                }}
-                                fullWidth
-                                type="submit"
-                                sx={{
-                                    mb: "2rem",
-                                    p: "1rem",
-                                    backgroundColor: "red",
-                                    color: "white",
-                                    "&:hover": { color: palette.primary.main },
-                                }}
-                            >
-                                GUEST USER LOGIN
-                            </Button>
-                        )}
-                        <Typography
-                            onClick={() => {
-                                setPageType(isLogin ? "register" : "login");
-                                resetForm();
-                            }}
-                            sx={{
-                                textDecoration: "underline",
-                                color: palette.primary.main,
-                                "&:hover": {
-                                    cursor: "pointer",
-                                    color: palette.primary.light,
-                                },
-                            }}
-                        >
-                            {isLogin
-                                ? "Don't have an account? Sign Up here."
-                                : "Already have an account? Login here."}
-                        </Typography>
-                    </Box>
-                </form>
-            )}
-        </Formik>
+                        Get email & password
+                    </Button>
+                )}
+                <Typography
+                    onClick={() => {
+                        setPageType(isLogin ? "register" : "login");
+                    }}
+                >
+                    {isLogin
+                        ? "Don't have an account? Sign up here."
+                        : "Already have an account? Login here."}
+                </Typography>
+            </Box>
+        </Box>
     );
 };
 
-export default Form;
+export default Form2;
